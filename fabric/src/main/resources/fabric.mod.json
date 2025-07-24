@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 1,
+  "id": "${mod_id}",
+  "version": "${version}",
+  "name": "${mod_name}",
+  "description": "",
+  "authors": [
+    "xhyrom"
+  ],
+  "contact": {
+    "homepage": "",
+    "sources": ""
+  },
+  "license": "Apache-2.0",
+  "icon": "assets/${mod_id}/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      ""
+    ]
+  },
+  "mixins": [
+    ".mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=0.14.19",
+    "minecraft": [
+      "1.12",
+      "1.12.1",
+      "1.12.2"
+    ]
+  }
+}
