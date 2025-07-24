@@ -18,25 +18,35 @@ group = "dev.xhyrom.lanprops"
 
 val versionConfigs = mapOf(
     "v1_21" to VersionConfig(
-        minecraftVersion = property("minecraft_version_1_21") as String,
-        supportedVersions = property("supported_minecraft_versions_1_21") as String,
+        minecraftVersion = "1.21.8",
+        supportedVersions = "1.12.x",
         javaVersion = JavaVersion.VERSION_21,
-        mcpVersion = property("mcp_version_1_21") as String,
-        fabricLoaderVersion = property("fabric_loader_version_1_21") as String,
-        forgeVersion = property("forge_version_1_21") as String,
-        useLegacyFabric = true
+        mappings = MappingsConfig(
+            provider = "mojmap"
+        ),
+
+        fabricVersion = "0.16.14",
+        forgeVersion = "58.0.1",
+        neoForgeVersion = "21.8.10",
+        quiltVersion = "0.29.1"
     )
+)
+
+data class MappingsConfig(
+    val provider: String,
+    val version: String? = null
 )
 
 data class VersionConfig(
     val minecraftVersion: String,
     val supportedVersions: String,
     val javaVersion: JavaVersion,
-    val mcpVersion: String? = null,
-    val fabricLoaderVersion: String,
+    val mappings: MappingsConfig,
+    val fabricVersion: String,
     val forgeVersion: String? = null,
-    val neoforgeVersion: String? = null,
-    val useLegacyFabric: Boolean = false
+    val neoForgeVersion: String? = null,
+    val quiltVersion: String? = null,
+    val ornitheVersion: String? = null,
 )
 
 subprojects {
@@ -90,6 +100,14 @@ fun Project.configureVersionSpecificModule() {
             val parts = name.split("-")
             "neoforge" to parts[1]
         }
+        name.matches(Regex("quilt-v\\d+_\\d+")) -> {
+            val parts = name.split("-")
+            "quilt" to parts[1]
+        }
+        name.matches(Regex("ornithe-v\\d+_\\d+")) -> {
+            val parts = name.split("-")
+            "ornithe" to parts[1]
+        }
         else -> throw GradleException("Unknown project format: $name")
     }
 
@@ -134,6 +152,8 @@ fun Project.configureVersionSpecificModule() {
         "fabric" -> configureFabricModule(versionKey, config)
         "forge" -> configureForgeModule(versionKey, config)
         "neoforge" -> configureNeoForgeModule(versionKey, config)
+        "quilt" -> configureQuiltModule(versionKey, config)
+        "ornithe" -> configureOrnitheModule(versionKey, config)
     }
 }
 
@@ -151,11 +171,15 @@ fun Project.configureCommonVersionModule(versionKey: String, config: VersionConf
         version(config.minecraftVersion)
 
         mappings {
-            if (config.useLegacyFabric) {
-                searge()
-                mcp("stable", config.mcpVersion!!)
-            } else {
-                mojmap()
+            when (config.mappings.provider) {
+                "mcp" -> {
+                    searge()
+                    mcp("stable", config.mappings.version!!)
+                }
+                "mojmap" -> {
+                    mojmap()
+                }
+                else -> throw GradleException("Unknown mappings: ${config.mappings}")
             }
         }
 
@@ -182,24 +206,31 @@ fun Project.configureFabricModule(versionKey: String, config: VersionConfig) {
     apply(plugin = "xyz.wagyourtail.unimined")
 
     val shadowBundle: Configuration by configurations.creating
+    val isLegacyFabric = isLegacyVersion(config.minecraftVersion)
 
     unimined.minecraft {
         version(config.minecraftVersion)
 
-        if (config.useLegacyFabric) {
+        if (isLegacyFabric) {
             legacyFabric {
-                loader(config.fabricLoaderVersion)
-            }
-            mappings {
-                searge()
-                mcp("stable", config.mcpVersion!!)
+                loader(config.fabricVersion)
             }
         } else {
             fabric {
-                loader(config.fabricLoaderVersion)
+                loader(config.fabricVersion)
             }
-            mappings {
-                mojmap()
+        }
+
+        mappings {
+            when (config.mappings.provider) {
+                "mcp" -> {
+                    searge()
+                    mcp("stable", config.mappings.version!!)
+                }
+                "mojmap" -> {
+                    mojmap()
+                }
+                else -> throw GradleException("Unknown mappings: ${config.mappings}")
             }
         }
 
@@ -219,26 +250,28 @@ fun Project.configureForgeModule(versionKey: String, config: VersionConfig) {
     apply(plugin = "xyz.wagyourtail.unimined")
 
     val shadowBundle: Configuration by configurations.creating
+    val isLegacyVersion = config.minecraftVersion.startsWith("1.7.")
 
     unimined.minecraft {
         version(config.minecraftVersion)
 
-        if (config.useLegacyFabric) { // Using this flag to determine if it's legacy
-            minecraftForge {
-                loader(config.forgeVersion!!)
+        minecraftForge {
+            loader(config.forgeVersion!!)
+            if (!isLegacyVersion) {
                 mixinConfig("${rootProject.property("mod_id")}.mixins.json")
             }
-            mappings {
-                searge()
-                mcp("stable", config.mcpVersion!!)
-            }
-        } else {
-            neoForge {
-                loader(config.neoforgeVersion!!)
-                mixinConfig("${rootProject.property("mod_id")}.mixins.json")
-            }
-            mappings {
-                mojmap()
+        }
+
+        mappings {
+            when (config.mappings.provider) {
+                "mcp" -> {
+                    searge()
+                    mcp("stable", config.mappings.version!!)
+                }
+                "mojmap" -> {
+                    mojmap()
+                }
+                else -> throw GradleException("Unknown mappings: ${config.mappings}")
             }
         }
 
@@ -251,7 +284,7 @@ fun Project.configureForgeModule(versionKey: String, config: VersionConfig) {
         implementation(project(":common-$versionKey"))
         shadowBundle(project(":common-$versionKey"))
 
-        if (config.useLegacyFabric) { // Legacy forge
+        if (isLegacyVersion) {
             implementation("com.github.LegacyModdingMC.UniMixins:unimixins-all-1.7.10:0.1.20") {
                 isTransitive = false
             }
@@ -261,7 +294,7 @@ fun Project.configureForgeModule(versionKey: String, config: VersionConfig) {
         }
     }
 
-    if (config.useLegacyFabric) {
+    if (isLegacyVersion) {
         tasks.withType(Jar::class) {
             manifest.attributes.run {
                 this["FMLCorePluginContainsFMLMod"] = "true"
@@ -283,11 +316,21 @@ fun Project.configureNeoForgeModule(versionKey: String, config: VersionConfig) {
         version(config.minecraftVersion)
 
         neoForge {
-            loader(config.neoforgeVersion!!)
+            loader(config.neoForgeVersion!!)
             mixinConfig("${rootProject.property("mod_id")}.mixins.json")
         }
+
         mappings {
-            mojmap()
+            when (config.mappings.provider) {
+                "mcp" -> {
+                    searge()
+                    mcp("stable", config.mappings.version!!)
+                }
+                "mojmap" -> {
+                    mojmap()
+                }
+                else -> throw GradleException("Unknown mappings: ${config.mappings}")
+            }
         }
 
         defaultRemapJar = true
@@ -298,31 +341,95 @@ fun Project.configureNeoForgeModule(versionKey: String, config: VersionConfig) {
 
         implementation(project(":common-$versionKey"))
         shadowBundle(project(":common-$versionKey"))
-
-        if (config.useLegacyFabric) { // Legacy forge
-            implementation("com.github.LegacyModdingMC.UniMixins:unimixins-all-1.7.10:0.1.20") {
-                isTransitive = false
-            }
-            annotationProcessor("com.github.LegacyModdingMC.UniMixins:unimixins-all-1.7.10:0.1.20") {
-                isTransitive = false
-            }
-        }
     }
 
-    if (config.useLegacyFabric) {
-        tasks.withType(Jar::class) {
-            manifest.attributes.run {
-                this["FMLCorePluginContainsFMLMod"] = "true"
-                this["ForceLoadAsMod"] = "true"
-                this["TweakClass"] = "org.spongepowered.asm.launch.MixinTweaker"
-                this["MixinConfigs"] = "${rootProject.property("mod_id")}.mixins.json"
+    configureShadowJar(shadowBundle)
+}
+fun Project.configureQuiltModule(versionKey: String, config: VersionConfig) {
+    apply(plugin = "xyz.wagyourtail.unimined")
+
+    val shadowBundle: Configuration by configurations.creating
+
+    unimined.minecraft {
+        version(config.minecraftVersion)
+
+        quilt {
+            loader(config.quiltVersion!!)
+        }
+
+        mappings {
+            when (config.mappings.provider) {
+                "mcp" -> {
+                    searge()
+                    mcp("stable", config.mappings.version!!)
+                }
+                "mojmap" -> {
+                    mojmap()
+                }
+                else -> throw GradleException("Unknown mappings: ${config.mappings}")
             }
         }
+
+        defaultRemapJar = true
+    }
+
+    dependencies {
+        implementation(project(":quilt"))
+
+        implementation(project(":common-$versionKey"))
+        shadowBundle(project(":common-$versionKey"))
+    }
+
+    configureShadowJar(shadowBundle)
+}
+fun Project.configureOrnitheModule(versionKey: String, config: VersionConfig) {
+    apply(plugin = "xyz.wagyourtail.unimined")
+
+    val shadowBundle: Configuration by configurations.creating
+
+    unimined.minecraft {
+        version(config.minecraftVersion)
+
+        ornitheFabric {
+            loader(config.ornitheVersion!!)
+        }
+
+        mappings {
+            when (config.mappings.provider) {
+                "mcp" -> {
+                    searge()
+                    mcp("stable", config.mappings.version!!)
+                }
+                "mojmap" -> {
+                    mojmap()
+                }
+                else -> throw GradleException("Unknown mappings: ${config.mappings}")
+            }
+        }
+
+        defaultRemapJar = true
+    }
+
+    dependencies {
+        implementation(project(":ornithe"))
+
+        implementation(project(":common-$versionKey"))
+        shadowBundle(project(":common-$versionKey"))
     }
 
     configureShadowJar(shadowBundle)
 }
 
+
+fun isLegacyVersion(version: String): Boolean {
+    val parts = version.split(".")
+    if (parts.size < 2) return false
+
+    val major = parts[0].toIntOrNull() ?: return false
+    val minor = parts[1].toIntOrNull() ?: return false
+
+    return major == 1 && minor <= 13
+}
 
 fun Project.configureShadowJar(shadowBundle: Configuration) {
     tasks.named<ShadowJar>("shadowJar") {
@@ -337,7 +444,6 @@ fun Project.configureShadowJar(shadowBundle: Configuration) {
 
         mergeServiceFiles()
     }
-
 }
 
 fun getLatestChangelog(): String {

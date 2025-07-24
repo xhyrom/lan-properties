@@ -24,7 +24,10 @@ rootProject.name = "lan-properties"
 sequenceOf(
     "common",
     "fabric",
-    "forge"
+    "forge",
+    "neoforge",
+    "quilt",
+    "ornithe"
 ).forEach {
     include(it)
 }
@@ -33,7 +36,7 @@ sequenceOf(
 val supportedVersions = listOf("v1_21")
 
 supportedVersions.forEach { version ->
-    sequenceOf("common", "fabric", "forge").forEach { loader ->
+    sequenceOf("common", "fabric", "forge", "neoforge", "quilt", "ornithe").forEach { loader ->
         include("$loader-$version")
         project(":$loader-$version").projectDir = file("$loader/$version")
     }
