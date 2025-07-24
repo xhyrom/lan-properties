@@ -1,4 +1,5 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+import xyz.wagyourtail.unimined.api.minecraft.task.RemapJarTask
 import xyz.wagyourtail.unimined.api.unimined
 
 plugins {
@@ -10,6 +11,8 @@ plugins {
 }
 
 val baseName: String = property("archives_base_name") as String
+val modName: String = property("mod_name") as String
+val modDescription: String = property("mod_description") as String
 val modId: String = property("mod_id") as String
 val modVersion: String = property("mod_version") as String
 
@@ -27,7 +30,7 @@ val versionConfigs = mapOf(
 
         fabricVersion = "0.16.14",
         forgeVersion = "58.0.1",
-        neoForgeVersion = "21.8.10",
+        neoForgeVersion = "10",
         quiltVersion = "0.29.1"
     )
 )
@@ -73,10 +76,10 @@ subprojects {
     }
 
     when {
-        name in listOf("common", "fabric", "forge") -> {
+        name in listOf("common", "fabric", "forge", "neoforge", "quilt", "ornithe") -> {
             return@subprojects
         }
-        name.matches(Regex("(common|fabric|forge)-v\\d+_\\d+")) -> {
+        name.matches(Regex("(common|fabric|forge|neoforge|quilt|ornithe)-v\\d+_\\d+")) -> {
             configureVersionSpecificModule()
         }
     }
@@ -113,6 +116,18 @@ fun Project.configureVersionSpecificModule() {
 
     val config = versionConfigs[versionKey] ?: throw GradleException("No config for version: $versionKey")
 
+    val loaderVersionMap = mapOf(
+        "forge" to config.forgeVersion,
+        "neoforge" to config.neoForgeVersion,
+        "quilt" to config.quiltVersion,
+        "ornithe" to config.ornitheVersion
+    )
+
+    if (loader in loaderVersionMap && loaderVersionMap[loader] == null) {
+        println("Skipping $name: $loader not supported for $versionKey")
+        return
+    }
+
     base {
         archivesName.set("${baseName}_${loader}-${modVersion}+${config.supportedVersions}")
     }
@@ -124,12 +139,14 @@ fun Project.configureVersionSpecificModule() {
     }
 
     tasks.processResources {
-        inputs.property("version", modVersion)
         inputs.property("mod_id", modId)
+        inputs.property("mod_version", modVersion)
+        inputs.property("mod_name", modName)
+        inputs.property("mod_description", modDescription)
         inputs.property("minecraft_version", config.minecraftVersion)
         inputs.property("supported_versions", config.supportedVersions)
 
-        filesMatching(listOf("mcmod.info", "fabric.mod.json", "META-INF/mods.toml", "${modId}.mixins.json")) {
+        filesMatching(listOf("mcmod.info", "fabric.mod.json", "META-INF/mods.toml", "META-INF/neoforge.mods.toml", "${modId}.mixins.json")) {
             expand(inputs.properties)
         }
     }
@@ -148,7 +165,7 @@ fun Project.configureVersionSpecificModule() {
     }
 
     when (loader) {
-        "common" -> configureCommonVersionModule(versionKey, config)
+        "common" -> configureCommonVersionModule(config)
         "fabric" -> configureFabricModule(versionKey, config)
         "forge" -> configureForgeModule(versionKey, config)
         "neoforge" -> configureNeoForgeModule(versionKey, config)
@@ -157,7 +174,7 @@ fun Project.configureVersionSpecificModule() {
     }
 }
 
-fun Project.configureCommonVersionModule(versionKey: String, config: VersionConfig) {
+fun Project.configureCommonVersionModule(config: VersionConfig) {
     apply(plugin = "xyz.wagyourtail.unimined")
     apply(plugin = "java-library")
 
@@ -244,6 +261,18 @@ fun Project.configureFabricModule(versionKey: String, config: VersionConfig) {
         shadowBundle(project(":common-$versionKey"))
     }
 
+    tasks.named<RemapJarTask>("remapJar") {
+        dependsOn(tasks.named<ShadowJar>("shadowJar"))
+        asJar {
+            inputFile.set(tasks.named<ShadowJar>("shadowJar").get().archiveFile)
+            archiveFileName.set("${base.archivesName.get()}.jar")
+        }
+    }
+
+    tasks.build {
+        dependsOn(tasks.named<RemapJarTask>("remapJar"))
+    }
+
     configureShadowJar(shadowBundle)
 }
 fun Project.configureForgeModule(versionKey: String, config: VersionConfig) {
@@ -305,6 +334,18 @@ fun Project.configureForgeModule(versionKey: String, config: VersionConfig) {
         }
     }
 
+    tasks.named<RemapJarTask>("remapJar") {
+        dependsOn(tasks.named<ShadowJar>("shadowJar"))
+        asJar {
+            inputFile.set(tasks.named<ShadowJar>("shadowJar").get().archiveFile)
+            archiveFileName.set("${base.archivesName.get()}.jar")
+        }
+    }
+
+    tasks.build {
+        dependsOn(tasks.named<RemapJarTask>("remapJar"))
+    }
+
     configureShadowJar(shadowBundle)
 }
 fun Project.configureNeoForgeModule(versionKey: String, config: VersionConfig) {
@@ -341,6 +382,18 @@ fun Project.configureNeoForgeModule(versionKey: String, config: VersionConfig) {
 
         implementation(project(":common-$versionKey"))
         shadowBundle(project(":common-$versionKey"))
+    }
+
+    tasks.named<RemapJarTask>("remapJar") {
+        dependsOn(tasks.named<ShadowJar>("shadowJar"))
+        asJar {
+            inputFile.set(tasks.named<ShadowJar>("shadowJar").get().archiveFile)
+            archiveFileName.set("${base.archivesName.get()}.jar")
+        }
+    }
+
+    tasks.build {
+        dependsOn(tasks.named<RemapJarTask>("remapJar"))
     }
 
     configureShadowJar(shadowBundle)
@@ -380,6 +433,18 @@ fun Project.configureQuiltModule(versionKey: String, config: VersionConfig) {
         shadowBundle(project(":common-$versionKey"))
     }
 
+    tasks.named<RemapJarTask>("remapJar") {
+        dependsOn(tasks.named<ShadowJar>("shadowJar"))
+        asJar {
+            inputFile.set(tasks.named<ShadowJar>("shadowJar").get().archiveFile)
+            archiveFileName.set("${base.archivesName.get()}.jar")
+        }
+    }
+
+    tasks.build {
+        dependsOn(tasks.named<RemapJarTask>("remapJar"))
+    }
+
     configureShadowJar(shadowBundle)
 }
 fun Project.configureOrnitheModule(versionKey: String, config: VersionConfig) {
@@ -415,6 +480,18 @@ fun Project.configureOrnitheModule(versionKey: String, config: VersionConfig) {
 
         implementation(project(":common-$versionKey"))
         shadowBundle(project(":common-$versionKey"))
+    }
+
+    tasks.named<RemapJarTask>("remapJar") {
+        dependsOn(tasks.named<ShadowJar>("shadowJar"))
+        asJar {
+            inputFile.set(tasks.named<ShadowJar>("shadowJar").get().archiveFile)
+            archiveFileName.set("${base.archivesName.get()}.jar")
+        }
+    }
+
+    tasks.build {
+        dependsOn(tasks.named<RemapJarTask>("remapJar"))
     }
 
     configureShadowJar(shadowBundle)

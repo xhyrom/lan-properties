@@ -1,33 +1,29 @@
 {
   "schemaVersion": 1,
   "id": "${mod_id}",
-  "version": "${version}",
+  "version": "${mod_version}",
   "name": "${mod_name}",
-  "description": "",
+  "description": "${mod_description}",
   "authors": [
     "xhyrom"
   ],
   "contact": {
-    "homepage": "",
-    "sources": ""
+    "homepage": "https://modrinth.com/mod/lan-properties",
+    "sources": "https://github.com/xhyrom/lan-properties"
   },
   "license": "Apache-2.0",
   "icon": "assets/${mod_id}/icon.png",
   "environment": "*",
   "entrypoints": {
     "main": [
-      ""
+      "dev.xhyrom.lanprops.LanPropertiesClientFabric"
     ]
   },
   "mixins": [
-    ".mixins.json"
+    "${mod_id}.mixins.json"
   ],
   "depends": {
     "fabricloader": ">=0.14.19",
-    "minecraft": [
-      "1.12",
-      "1.12.1",
-      "1.12.2"
-    ]
+    "minecraft": ">=1.7"
   }
 }
