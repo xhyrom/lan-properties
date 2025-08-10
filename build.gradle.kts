@@ -139,6 +139,8 @@ fun Project.configureVersionSpecificModule() {
     }
 
     tasks.processResources {
+        duplicatesStrategy = DuplicatesStrategy.INCLUDE
+
         inputs.property("mod_id", modId)
         inputs.property("mod_version", modVersion)
         inputs.property("mod_name", modName)
@@ -148,19 +150,6 @@ fun Project.configureVersionSpecificModule() {
 
         filesMatching(listOf("mcmod.info", "fabric.mod.json", "META-INF/mods.toml", "META-INF/neoforge.mods.toml", "${modId}.mixins.json")) {
             expand(inputs.properties)
-        }
-    }
-
-    sourceSets {
-        main {
-            java {
-                srcDir("../src/main/java")
-                srcDir("src/main/java")
-            }
-            resources {
-                srcDir("../src/main/resources")
-                srcDir("src/main/resources")
-            }
         }
     }
 
@@ -213,6 +202,20 @@ fun Project.configureCommonVersionModule(config: VersionConfig) {
     tasks.named<ShadowJar>("shadowJar") {
         configurations = listOf(shadowBundle)
         archiveClassifier = "no-remap"
+        duplicatesStrategy = DuplicatesStrategy.INCLUDE
+    }
+
+    sourceSets {
+        main {
+            java {
+                srcDir("../src/main/java")
+                srcDir("src/main/java")
+            }
+            resources {
+                srcDir("../src/main/resources")
+                srcDir("src/main/resources")
+            }
+        }
     }
 
     artifacts {

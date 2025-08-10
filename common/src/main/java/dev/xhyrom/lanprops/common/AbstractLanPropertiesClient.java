@@ -1,14 +1,13 @@
-package dev.xhyrom.lanprops;
+package dev.xhyrom.lanprops.common;
 
 import org.tinylog.Logger;
 import org.tinylog.TaggedLogger;
 
-public class LanPropertiesClient {
+abstract class AbstractLanPropertiesClient {
     public static final String MOD_ID = "lan_properties";
-
     public static final TaggedLogger LOGGER = Logger.tag(MOD_ID);
 
     public static void init() {
-        LOGGER.info("LAN Properties Client initialized.");
+        LOGGER.info("Lan Properties Mod initialized.");
     }
 }
