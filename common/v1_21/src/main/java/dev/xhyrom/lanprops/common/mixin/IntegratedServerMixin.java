@@ -59,6 +59,16 @@ public abstract class IntegratedServerMixin extends MinecraftServer implements C
         this.setEnforceWhitelist(dedicatedServerProperties.enforceWhitelist);
     }
 
+    @Inject(method = "publishServer", at = @At("HEAD"))
+    public void onPublishServer(@Nullable GameType gameType, boolean bl, int i, CallbackInfoReturnable<Integer> cir) {
+        this.lan_properties$customProperties().lan_properties$serverPort(i);
+    }
+
+    @Inject(method = "stopServer", at = @At("HEAD"))
+    public void onStopServer(CallbackInfo ci) {
+        this.lan_properties$settings.forceSave();
+    }
+
     public boolean isSpawningMonsters() {
         return this.lan_properties$settings.getProperties().spawnMonsters && super.isSpawningMonsters();
     }

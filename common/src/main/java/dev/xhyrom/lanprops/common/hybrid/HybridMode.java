@@ -2,6 +2,7 @@ package dev.xhyrom.lanprops.common.hybrid;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import dev.xhyrom.lanprops.common.AbstractLanPropertiesClient;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -11,7 +12,7 @@ import java.util.UUID;
 
 public final class HybridMode {
     public static UUID onlinePlayerUuid(final String playerName) {
-        System.out.println("Hybrid mode: fetching UUID for player " + playerName);
+        AbstractLanPropertiesClient.LOGGER.info("Hybrid mode: fetching UUID for player " + playerName);
 
         try {
             final URL url = new URL("https://api.mojang.com/users/profiles/minecraft/" + playerName);
@@ -42,7 +43,7 @@ public final class HybridMode {
                     "(\\p{XDigit}{8})(\\p{XDigit}{4})(\\p{XDigit}{4})(\\p{XDigit}{4})(\\p{XDigit}+)",
                     "$1-$2-$3-$4-$5"));
         } catch (Exception e) {
-            e.printStackTrace();
+            AbstractLanPropertiesClient.LOGGER.error("Hybrid mode: error fetching UUID for player " + playerName, e);
         }
 
         return null;

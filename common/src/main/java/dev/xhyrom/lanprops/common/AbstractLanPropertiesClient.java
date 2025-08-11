@@ -3,7 +3,7 @@ package dev.xhyrom.lanprops.common;
 import org.tinylog.Logger;
 import org.tinylog.TaggedLogger;
 
-abstract class AbstractLanPropertiesClient {
+public abstract class AbstractLanPropertiesClient {
     public static final String MOD_ID = "lan_properties";
     public static final TaggedLogger LOGGER = Logger.tag(MOD_ID);
 
