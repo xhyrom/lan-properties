@@ -2,6 +2,8 @@ package dev.xhyrom.lanprops.common.mixin;
 
 import com.google.common.base.MoreObjects;
 import com.mojang.datafixers.DataFixer;
+import dev.xhyrom.lanprops.common.accessors.CustomDedicatedServerProperties;
+import dev.xhyrom.lanprops.common.accessors.CustomIntegratedServer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.server.IntegratedServer;
 import net.minecraft.server.MinecraftServer;
@@ -28,7 +30,7 @@ import java.net.Proxy;
 import java.util.Optional;
 
 @Mixin(IntegratedServer.class)
-public abstract class IntegratedServerMixin extends MinecraftServer {
+public abstract class IntegratedServerMixin extends MinecraftServer implements CustomIntegratedServer {
     public IntegratedServerMixin(Thread thread, LevelStorageSource.LevelStorageAccess levelStorageAccess, PackRepository packRepository, WorldStem worldStem, Proxy proxy, DataFixer dataFixer, Services services, ChunkProgressListenerFactory chunkProgressListenerFactory) {
         super(thread, levelStorageAccess, packRepository, worldStem, proxy, dataFixer, services, chunkProgressListenerFactory);
     }
@@ -62,16 +64,21 @@ public abstract class IntegratedServerMixin extends MinecraftServer {
     }
 
     @Unique
-    public DedicatedServerProperties lan_properties$getProperties() {
+    public @NotNull DedicatedServerProperties lan_properties$properties() {
         return this.lan_properties$settings.getProperties();
     }
 
+    @Unique
+    public @NotNull CustomDedicatedServerProperties lan_properties$customProperties() {
+        return (CustomDedicatedServerProperties) this.lan_properties$settings.getProperties();
+    }
+
     public void forceDifficulty() {
-        this.setDifficulty(this.lan_properties$getProperties().difficulty, true);
+        this.setDifficulty(this.lan_properties$properties().difficulty, true);
     }
 
     public boolean isLevelEnabled(Level level) {
-        return level.dimension() != Level.NETHER || this.lan_properties$getProperties().allowNether;
+        return level.dimension() != Level.NETHER || this.lan_properties$properties().allowNether;
     }
 
     public void setPlayerIdleTimeout(int i) {
@@ -80,68 +87,68 @@ public abstract class IntegratedServerMixin extends MinecraftServer {
     }
 
     public int getRateLimitPacketsPerSecond() {
-        return this.lan_properties$getProperties().rateLimitPacketsPerSecond;
+        return this.lan_properties$properties().rateLimitPacketsPerSecond;
     }
 
     public boolean isEpollEnabled() {
-        return this.lan_properties$getProperties().useNativeTransport;
+        return this.lan_properties$properties().useNativeTransport;
     }
 
     public boolean isCommandBlockEnabled() {
-        return this.lan_properties$getProperties().enableCommandBlock;
+        return this.lan_properties$properties().enableCommandBlock;
     }
 
     public int getSpawnProtectionRadius() {
-        return this.lan_properties$getProperties().spawnProtection;
+        return this.lan_properties$properties().spawnProtection;
     }
 
     public boolean repliesToStatus() {
-        return this.lan_properties$getProperties().enableStatus;
+        return this.lan_properties$properties().enableStatus;
     }
 
     public boolean hidesOnlinePlayers() {
-        return this.lan_properties$getProperties().hideOnlinePlayers;
+        return this.lan_properties$properties().hideOnlinePlayers;
     }
 
     public int getOperatorUserPermissionLevel() {
-        return this.lan_properties$getProperties().opPermissionLevel;
+        return this.lan_properties$properties().opPermissionLevel;
     }
 
     public int getFunctionCompilationLevel() {
-        return this.lan_properties$getProperties().functionPermissionLevel;
+        return this.lan_properties$properties().functionPermissionLevel;
     }
 
     public boolean shouldRconBroadcast() {
-        return this.lan_properties$getProperties().broadcastRconToOps;
+        return this.lan_properties$properties().broadcastRconToOps;
     }
 
     public boolean shouldInformAdmins() {
-        return this.lan_properties$getProperties().broadcastConsoleToOps;
+        return this.lan_properties$properties().broadcastConsoleToOps;
     }
 
     public int getAbsoluteMaxWorldSize() {
-        return this.lan_properties$getProperties().maxWorldSize;
+        return this.lan_properties$properties().maxWorldSize;
     }
 
     public int getCompressionThreshold() {
-        return this.lan_properties$getProperties().networkCompressionThreshold;
+        return this.lan_properties$properties().networkCompressionThreshold;
     }
 
     public boolean logIPs() {
-        return this.lan_properties$getProperties().logIPs;
+        return this.lan_properties$properties().logIPs;
     }
 
     public boolean enforceSecureProfile() {
-        DedicatedServerProperties dedicatedServerProperties = this.lan_properties$getProperties();
+        DedicatedServerProperties dedicatedServerProperties = this.lan_properties$properties();
         return dedicatedServerProperties.enforceSecureProfile && dedicatedServerProperties.onlineMode && this.services.canValidateProfileKeys();
     }
 
     public int getMaxChainedNeighborUpdates() {
-        return this.lan_properties$getProperties().maxChainedNeighborUpdates;
+        return this.lan_properties$properties().maxChainedNeighborUpdates;
     }
 
     public int getScaledTrackingDistance(int i) {
-        return this.lan_properties$getProperties().entityBroadcastRangePercentage * i / 100;
+        return this.lan_properties$properties().entityBroadcastRangePercentage * i / 100;
     }
 
     public boolean forceSynchronousWrites() {

@@ -16,6 +16,8 @@ dependencies {
     api("org.tinylog:tinylog-api:2.7.0")
     api("org.tinylog:tinylog-impl:2.7.0")
 
+    api("com.google.code.gson:gson:2.13.1")
+
     // Annotations
     compileOnly("org.jetbrains:annotations:24.1.0")
 }
