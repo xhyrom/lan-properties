@@ -3,6 +3,7 @@ package dev.xhyrom.lanprops.common.mixin;
 import dev.xhyrom.lanprops.common.accessors.CustomDedicatedServerProperties;
 import net.minecraft.server.dedicated.DedicatedServerProperties;
 import net.minecraft.server.dedicated.Settings;
+import org.jetbrains.annotations.NotNull;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -18,6 +19,10 @@ public abstract class DedicatedServerPropertiesMixin extends Settings<DedicatedS
 
     public DedicatedServerPropertiesMixin(Properties properties) {
         super(properties);
+    }
+
+    public @NotNull Properties lan_properties$properties() {
+        return this.properties;
     }
 
     public int lan_properties$serverPort() {

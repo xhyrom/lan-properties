@@ -74,6 +74,11 @@ public abstract class IntegratedServerMixin extends MinecraftServer implements C
     }
 
     @Unique
+    public @NotNull DedicatedServerSettings lan_properties$settings() {
+        return this.lan_properties$settings;
+    }
+
+    @Unique
     public @NotNull DedicatedServerProperties lan_properties$properties() {
         return this.lan_properties$settings.getProperties();
     }
