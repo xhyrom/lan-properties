@@ -106,9 +106,25 @@ public class PropertiesList extends ContainerObjectSelectionList<PropertiesList.
                 editBox.setResponder(str -> {
                     if (str.matches("-?\\d+")) {
                         callback.accept(Integer.parseInt(str), str);
-                        editBox.setTextColor(0xE0E0E0);
+                        editBox.setTextColor(-2039584);
                     } else {
-                        editBox.setTextColor(0xFF5555);
+                        editBox.setTextColor(-236718492);
+                    }
+                });
+
+                return editBox;
+            }
+
+            if (type == long.class) {
+                final EditBox editBox = new EditBox(minecraft.font, 0, 0, 148, 18, Component.empty());
+
+                editBox.setValue(value);
+                editBox.setResponder(str -> {
+                    if (str.matches("-?\\d+")) {
+                        callback.accept(Long.parseLong(str), str);
+                        editBox.setTextColor(-2039584);
+                    } else {
+                        editBox.setTextColor(-236718492);
                     }
                 });
 

@@ -27,6 +27,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.net.Proxy;
+import java.nio.file.Path;
 import java.util.Optional;
 
 @Mixin(IntegratedServer.class)
@@ -39,11 +40,14 @@ public abstract class IntegratedServerMixin extends MinecraftServer implements C
 
     @Shadow @Nullable private GameType publishedGameType;
     @Unique
+    public Path lan_properties$propertiesPath;
+    @Unique
     public DedicatedServerSettings lan_properties$settings;
 
     @Inject(method = "<init>", at = @At("RETURN"))
     public void onInit(Thread thread, Minecraft minecraft, LevelStorageSource.LevelStorageAccess levelStorageAccess, PackRepository packRepository, WorldStem worldStem, Services services, ChunkProgressListenerFactory chunkProgressListenerFactory, CallbackInfo ci) {
-        this.lan_properties$settings = new DedicatedServerSettings(levelStorageAccess.getLevelDirectory().path().resolve("server.properties"));
+        this.lan_properties$propertiesPath = levelStorageAccess.getLevelDirectory().path().resolve("server.properties");
+        this.lan_properties$settings = new DedicatedServerSettings(this.lan_properties$propertiesPath);
         this.lan_properties$settings.forceSave();
     }
 
@@ -71,6 +75,10 @@ public abstract class IntegratedServerMixin extends MinecraftServer implements C
 
     public boolean isSpawningMonsters() {
         return this.lan_properties$settings.getProperties().spawnMonsters && super.isSpawningMonsters();
+    }
+
+    public @NotNull Path lan_properties$propertiesPath() {
+        return this.lan_properties$propertiesPath;
     }
 
     @Unique

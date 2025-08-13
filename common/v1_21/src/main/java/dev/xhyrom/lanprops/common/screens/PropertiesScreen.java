@@ -1,6 +1,7 @@
 package dev.xhyrom.lanprops.common.screens;
 
 import dev.xhyrom.lanprops.common.accessors.CustomIntegratedServer;
+import net.minecraft.Util;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.layouts.HeaderAndFooterLayout;
@@ -29,7 +30,8 @@ public class PropertiesScreen extends Screen {
 
     @Override
     protected void init() {
-        this.serverSettings = ((CustomIntegratedServer) this.minecraft.getSingleplayerServer()).lan_properties$settings();
+        final CustomIntegratedServer server = (CustomIntegratedServer) this.minecraft.getSingleplayerServer();
+        this.serverSettings = server.lan_properties$settings();
 
         this.layout.addTitleHeader(TITLE, this.font);
 
@@ -37,6 +39,7 @@ public class PropertiesScreen extends Screen {
 
         final LinearLayout footerLayout = this.layout.addToFooter(LinearLayout.horizontal().spacing(8));
 
+        footerLayout.addChild(Button.builder(Component.translatable("lan_properties.gui.open_properties"), (button) -> Util.getPlatform().openFile(server.lan_properties$propertiesPath().toFile())).build());
         footerLayout.addChild(Button.builder(CommonComponents.GUI_DONE, (button) -> this.onClose()).build());
 
         this.layout.visitWidgets(this::addRenderableWidget);
