@@ -27,6 +27,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.net.Proxy;
+import java.nio.file.Path;
 import java.util.Optional;
 
 @Mixin(IntegratedServer.class)
@@ -39,29 +40,38 @@ public abstract class IntegratedServerMixin extends MinecraftServer implements C
 
     @Shadow @Nullable private GameType publishedGameType;
     @Unique
+    public Path lan_properties$propertiesPath;
+    @Unique
     public DedicatedServerSettings lan_properties$settings;
 
     @Inject(method = "<init>", at = @At("RETURN"))
     public void onInit(Thread thread, Minecraft minecraft, LevelStorageSource.LevelStorageAccess levelStorageAccess, PackRepository packRepository, WorldStem worldStem, Services services, ChunkProgressListenerFactory chunkProgressListenerFactory, CallbackInfo ci) {
-        this.lan_properties$settings = new DedicatedServerSettings(levelStorageAccess.getLevelDirectory().path().resolve("server.properties"));
+        this.lan_properties$propertiesPath = levelStorageAccess.getLevelDirectory().path().resolve("server.properties");
+        this.lan_properties$settings = new DedicatedServerSettings(this.lan_properties$propertiesPath);
         this.lan_properties$settings.forceSave();
     }
 
     @Inject(method = "initServer", at = @At("RETURN"))
     public void onInitServer(CallbackInfoReturnable<Boolean> cir) {
-        DedicatedServerProperties dedicatedServerProperties = this.lan_properties$settings.getProperties();
-        this.setUsesAuthentication(dedicatedServerProperties.onlineMode);
-        this.setPreventProxyConnections(dedicatedServerProperties.preventProxyConnections);
-        this.setPvpAllowed(dedicatedServerProperties.pvp);
-        this.setFlightAllowed(dedicatedServerProperties.allowFlight);
-        this.setMotd(dedicatedServerProperties.motd);
-        super.setPlayerIdleTimeout(dedicatedServerProperties.playerIdleTimeout.get());
-        this.setEnforceWhitelist(dedicatedServerProperties.enforceWhitelist);
+        this.lan_properties$updateSettings();
+    }
+
+    @Unique
+    private void lan_properties$updateSettings() {
+        CustomDedicatedServerProperties dedicatedServerProperties = (CustomDedicatedServerProperties) this.lan_properties$settings.getProperties();
+        this.setUsesAuthentication(dedicatedServerProperties.lan_properties$onlineMode());
+        this.setPreventProxyConnections(dedicatedServerProperties.lan_properties$preventProxyConnections());
+        this.setPvpAllowed(dedicatedServerProperties.lan_properties$pvp());
+        this.setFlightAllowed(dedicatedServerProperties.lan_properties$allowFlight());
+        this.setMotd(dedicatedServerProperties.lan_properties$motd());
+        super.setPlayerIdleTimeout(dedicatedServerProperties.lan_properties$playerIdleTimeout());
+        this.setEnforceWhitelist(dedicatedServerProperties.lan_properties$enforceWhitelist());
     }
 
     @Inject(method = "publishServer", at = @At("HEAD"))
     public void onPublishServer(@Nullable GameType gameType, boolean bl, int i, CallbackInfoReturnable<Integer> cir) {
         this.lan_properties$customProperties().lan_properties$serverPort(i);
+        this.lan_properties$updateSettings();
     }
 
     @Inject(method = "stopServer", at = @At("HEAD"))
@@ -71,6 +81,15 @@ public abstract class IntegratedServerMixin extends MinecraftServer implements C
 
     public boolean isSpawningMonsters() {
         return this.lan_properties$settings.getProperties().spawnMonsters && super.isSpawningMonsters();
+    }
+
+    public @NotNull Path lan_properties$propertiesPath() {
+        return this.lan_properties$propertiesPath;
+    }
+
+    @Unique
+    public @NotNull DedicatedServerSettings lan_properties$settings() {
+        return this.lan_properties$settings;
     }
 
     @Unique
