@@ -39,7 +39,7 @@ public class PropertiesScreen extends Screen {
 
         final LinearLayout footerLayout = this.layout.addToFooter(LinearLayout.horizontal().spacing(8));
 
-        footerLayout.addChild(Button.builder(Component.translatable("lan_properties.gui.open_properties"), (button) -> Util.getPlatform().openFile(server.lan_properties$propertiesPath().toFile())).build());
+        footerLayout.addChild(Button.builder(Component.translatable("lan_properties.gui.open_world"), (button) -> Util.getPlatform().openPath(server.lan_properties$propertiesPath().getParent())).build());
         footerLayout.addChild(Button.builder(CommonComponents.GUI_DONE, (button) -> this.onClose()).build());
 
         this.layout.visitWidgets(this::addRenderableWidget);

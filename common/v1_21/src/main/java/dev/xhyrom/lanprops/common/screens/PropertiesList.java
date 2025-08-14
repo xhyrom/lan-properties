@@ -3,6 +3,7 @@ package dev.xhyrom.lanprops.common.screens;
 import com.google.common.collect.ImmutableList;
 import dev.xhyrom.lanprops.common.LanPropertiesClient;
 import dev.xhyrom.lanprops.common.accessors.CustomDedicatedServerProperties;
+import dev.xhyrom.lanprops.common.accessors.CustomSettings;
 import dev.xhyrom.lanprops.common.utils.StringUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -18,7 +19,6 @@ import net.minecraft.world.Difficulty;
 import net.minecraft.world.level.GameType;
 import org.jetbrains.annotations.NotNull;
 
-import java.lang.reflect.Field;
 import java.util.*;
 import java.util.function.BiConsumer;
 
@@ -45,25 +45,20 @@ public class PropertiesList extends ContainerObjectSelectionList<PropertiesList.
     }
 
     private void populateList() {
-        record PropertyData(Field field, String propertyName) {}
+        record PropertyData(String name, Class<?> type) {}
 
-        Arrays.stream(DedicatedServerProperties.class.getFields())
-                .filter(field -> ALLOWED_FIELD_TYPES.contains(field.getType()) || field.getType().isEnum())
-                .map(field -> {
-                    String cleanedName = field.getName().replace("lan_properties$", "");
 
-                    String propertyName = cleanedName
-                            .replaceAll("([a-z])([A-Z])", "$1-$2")
-                            .toLowerCase(Locale.ROOT);
-
-                    return new PropertyData(field, propertyName);
-                })
-                .sorted(Comparator.comparing(PropertyData::propertyName))
+        ((CustomSettings) serverProperties).lan_properties$keys().entrySet().stream()
+                .map(entry -> new PropertyData(entry.getKey(), entry.getValue()))
+                .sorted(Comparator.comparing(PropertyData::name))
                 .forEach(data -> {
                     try {
-                        this.addEntry(new PropertyEntry(data.field(), data.propertyName()));
-                    } catch (IllegalAccessException ignored) {}
+                        this.addEntry(new PropertyEntry(data.name(), data.type()));
+                    } catch (IllegalAccessException e) {
+                        LanPropertiesClient.LOGGER.error("Failed to create property entry for '{}'", data.name(), e);
+                    }
                 });
+
     }
 
     @Override
@@ -78,13 +73,13 @@ public class PropertiesList extends ContainerObjectSelectionList<PropertiesList.
         private final AbstractWidget editWidget;
         private static final int PADDING = 160;
 
-        public PropertyEntry(Field field, String propertyKey) throws IllegalAccessException {
+        public PropertyEntry(String propertyKey, Class<?> type) throws IllegalAccessException {
             this.propertyName = Component.literal(StringUtils.kebabCaseToTitleCase(propertyKey));
 
             final Properties properties = ((CustomDedicatedServerProperties) serverProperties).lan_properties$properties();
 
             final String currentValue = (String) properties.get(propertyKey);
-            this.editWidget = createWidget(field.getType(), currentValue, (raw, serialized) -> {
+            this.editWidget = createWidget(type, currentValue, (raw, serialized) -> {
                 properties.put(propertyKey, serialized);
 
                 LanPropertiesClient.LOGGER.info("Updated property '{}' to '{}'", propertyKey, serialized);

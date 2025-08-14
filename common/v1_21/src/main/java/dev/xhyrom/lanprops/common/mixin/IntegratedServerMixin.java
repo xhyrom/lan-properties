@@ -53,19 +53,25 @@ public abstract class IntegratedServerMixin extends MinecraftServer implements C
 
     @Inject(method = "initServer", at = @At("RETURN"))
     public void onInitServer(CallbackInfoReturnable<Boolean> cir) {
-        DedicatedServerProperties dedicatedServerProperties = this.lan_properties$settings.getProperties();
-        this.setUsesAuthentication(dedicatedServerProperties.onlineMode);
-        this.setPreventProxyConnections(dedicatedServerProperties.preventProxyConnections);
-        this.setPvpAllowed(dedicatedServerProperties.pvp);
-        this.setFlightAllowed(dedicatedServerProperties.allowFlight);
-        this.setMotd(dedicatedServerProperties.motd);
-        super.setPlayerIdleTimeout(dedicatedServerProperties.playerIdleTimeout.get());
-        this.setEnforceWhitelist(dedicatedServerProperties.enforceWhitelist);
+        this.lan_properties$updateSettings();
+    }
+
+    @Unique
+    private void lan_properties$updateSettings() {
+        CustomDedicatedServerProperties dedicatedServerProperties = (CustomDedicatedServerProperties) this.lan_properties$settings.getProperties();
+        this.setUsesAuthentication(dedicatedServerProperties.lan_properties$onlineMode());
+        this.setPreventProxyConnections(dedicatedServerProperties.lan_properties$preventProxyConnections());
+        this.setPvpAllowed(dedicatedServerProperties.lan_properties$pvp());
+        this.setFlightAllowed(dedicatedServerProperties.lan_properties$allowFlight());
+        this.setMotd(dedicatedServerProperties.lan_properties$motd());
+        super.setPlayerIdleTimeout(dedicatedServerProperties.lan_properties$playerIdleTimeout());
+        this.setEnforceWhitelist(dedicatedServerProperties.lan_properties$enforceWhitelist());
     }
 
     @Inject(method = "publishServer", at = @At("HEAD"))
     public void onPublishServer(@Nullable GameType gameType, boolean bl, int i, CallbackInfoReturnable<Integer> cir) {
         this.lan_properties$customProperties().lan_properties$serverPort(i);
+        this.lan_properties$updateSettings();
     }
 
     @Inject(method = "stopServer", at = @At("HEAD"))
