@@ -22,12 +22,11 @@ group = "dev.xhyrom.lanprops"
 val versionConfigs = mapOf(
     "v1_21" to VersionConfig(
         minecraftVersion = "1.21.8",
-        supportedVersions = "1.12.x",
+        supportedVersions = "1.21.7-1.21.8",
         javaVersion = JavaVersion.VERSION_21,
         mappings = MappingsConfig(
             provider = "mojmap"
         ),
-
         fabricVersion = "0.16.14",
         forgeVersion = "58.0.1",
         neoForgeVersion = "10",
