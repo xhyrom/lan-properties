@@ -33,7 +33,7 @@ sequenceOf(
 }
 
 
-val supportedVersions = listOf("v1_21")
+val supportedVersions = listOf("v1_21_7")
 
 supportedVersions.forEach { version ->
     sequenceOf("common", "fabric", "forge", "neoforge", "quilt", "ornithe").forEach { loader ->

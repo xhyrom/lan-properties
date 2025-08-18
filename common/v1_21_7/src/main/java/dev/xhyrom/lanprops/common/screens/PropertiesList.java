@@ -25,18 +25,6 @@ import java.util.function.BiConsumer;
 public class PropertiesList extends ContainerObjectSelectionList<PropertiesList.Entry> {
     private final DedicatedServerProperties serverProperties;
 
-    private static final Set<Class<?>> ALLOWED_FIELD_TYPES = Set.of(
-            String.class,
-            int.class,
-            Integer.class,
-            boolean.class,
-            Boolean.class,
-            long.class,
-            Long.class,
-            GameType.class,
-            Difficulty.class
-    );
-
     public PropertiesList(PropertiesScreen screen, Minecraft minecraft, DedicatedServerProperties serverProperties) {
         super(minecraft, screen.width, screen.layout.getContentHeight(), screen.layout.getHeaderHeight(), 25);
 

@@ -20,14 +20,14 @@ version = modVersion
 group = "dev.xhyrom.lanprops"
 
 val versionConfigs = mapOf(
-    "v1_21" to VersionConfig(
+    "v1_21_7" to VersionConfig(
         minecraftVersion = "1.21.8",
         supportedVersions = "1.21.7-1.21.8",
         javaVersion = JavaVersion.VERSION_21,
         mappings = MappingsConfig(
             provider = "mojmap"
         ),
-        fabricVersion = "0.16.14",
+        fabricLoaderVersion = "0.16.14",
         forgeVersion = "58.0.1",
         neoForgeVersion = "10",
         quiltVersion = "0.29.1"
@@ -44,7 +44,7 @@ data class VersionConfig(
     val supportedVersions: String,
     val javaVersion: JavaVersion,
     val mappings: MappingsConfig,
-    val fabricVersion: String,
+    val fabricLoaderVersion: String,
     val forgeVersion: String? = null,
     val neoForgeVersion: String? = null,
     val quiltVersion: String? = null,
@@ -78,7 +78,7 @@ subprojects {
         name in listOf("common", "fabric", "forge", "neoforge", "quilt", "ornithe") -> {
             return@subprojects
         }
-        name.matches(Regex("(common|fabric|forge|neoforge|quilt|ornithe)-v\\d+_\\d+")) -> {
+        name.matches(Regex("(common|fabric|forge|neoforge|quilt|ornithe)-v\\d+(_\\d+)+")) -> {
             configureVersionSpecificModule()
         }
     }
@@ -86,27 +86,27 @@ subprojects {
 
 fun Project.configureVersionSpecificModule() {
     val (loader, versionKey) = when {
-        name.matches(Regex("common-v\\d+_\\d+")) -> {
+        name.matches(Regex("common-v\\d+(_\\d+)+")) -> {
             val parts = name.split("-")
             "common" to parts[1]
         }
-        name.matches(Regex("fabric-v\\d+_\\d+")) -> {
+        name.matches(Regex("fabric-v\\d+(_\\d+)+")) -> {
             val parts = name.split("-")
             "fabric" to parts[1]
         }
-        name.matches(Regex("forge-v\\d+_\\d+")) -> {
+        name.matches(Regex("forge-v\\d+(_\\d+)+")) -> {
             val parts = name.split("-")
             "forge" to parts[1]
         }
-        name.matches(Regex("neoforge-v\\d+_\\d+")) -> {
+        name.matches(Regex("neoforge-v\\d+(_\\d+)+")) -> {
             val parts = name.split("-")
             "neoforge" to parts[1]
         }
-        name.matches(Regex("quilt-v\\d+_\\d+")) -> {
+        name.matches(Regex("quilt-v\\d+(_\\d+)+")) -> {
             val parts = name.split("-")
             "quilt" to parts[1]
         }
-        name.matches(Regex("ornithe-v\\d+_\\d+")) -> {
+        name.matches(Regex("ornithe-v\\d+(_\\d+)+")) -> {
             val parts = name.split("-")
             "ornithe" to parts[1]
         }
@@ -221,6 +221,7 @@ fun Project.configureCommonVersionModule(config: VersionConfig) {
         add(namedElements.name, tasks.named<ShadowJar>("shadowJar"))
     }
 }
+
 fun Project.configureFabricModule(versionKey: String, config: VersionConfig) {
     apply(plugin = "xyz.wagyourtail.unimined")
 
@@ -232,11 +233,11 @@ fun Project.configureFabricModule(versionKey: String, config: VersionConfig) {
 
         if (isLegacyFabric) {
             legacyFabric {
-                loader(config.fabricVersion)
+                loader(config.fabricLoaderVersion)
             }
         } else {
             fabric {
-                loader(config.fabricVersion)
+                loader(config.fabricLoaderVersion)
             }
         }
 
@@ -256,8 +257,13 @@ fun Project.configureFabricModule(versionKey: String, config: VersionConfig) {
         defaultRemapJar = true
     }
 
+    repositories {
+        unimined.fabricMaven()
+    }
+
     dependencies {
         implementation(project(":fabric"))
+        unimined.fabricModule("fabric-resource-loader-v0", "0.132.0+1.21.8")
 
         implementation(project(":common-$versionKey"))
         shadowBundle(project(":common-$versionKey"))
