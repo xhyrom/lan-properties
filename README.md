@@ -2,6 +2,19 @@
   <img src=".github/logo.png" alt="lan properties thumbnail" width="300">
 </h1>
 
+<div align="center">
+
+[![modrinth](https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/cozy/available/modrinth_vector.svg)](https://modrinth.com/mod/lan-properties)
+[![curseforge](https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/cozy/available/curseforge_vector.svg)]()
+[![github](https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/cozy/available/github_vector.svg)](https://github.com/xhyrom/lan-properties)
+
+![fabric](https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/cozy/supported/fabric_vector.svg)
+![forge](https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/cozy/supported/forge_vector.svg)
+
+[![ko-fi](https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/cozy/donate/kofi-singular-alt_vector.svg)](https://ko-fi.com/xhyrom)
+
+</div>
+
 **LAN Properties** enhances the vanilla "Open to LAN" interface to provide full control over all server settings, just like in server.properties on a dedicated server.
 
 ## What is LAN Properties?
