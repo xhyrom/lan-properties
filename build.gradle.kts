@@ -16,8 +16,16 @@ val modDescription: String = property("mod_description") as String
 val modId: String = property("mod_id") as String
 val modVersion: String = property("mod_version") as String
 
+val curseforgeToken = providers.gradleProperty("curseforge.token")
+    .orElse(providers.environmentVariable("CURSEFORGE_TOKEN"))
+
 val modrinthToken = providers.gradleProperty("modrinth.token")
     .orElse(providers.environmentVariable("MODRINTH_TOKEN"))
+
+val curseforgeOptions = publishMods.curseforgeOptions {
+    accessToken.set(curseforgeToken)
+    projectId.set("1330710")
+}
 
 val modrinthOptions = publishMods.modrinthOptions {
     accessToken.set(modrinthToken)
@@ -301,6 +309,25 @@ fun Project.configureFabricModule(versionKey: String, config: VersionConfig) {
         requires("fabric-api")
     }
 
+    publishMods.curseforge("curseforge-fabric-$versionKey") {
+        version = "${modVersion}+${formatSupportedVersions(config.supportedMinecraftVersions)}"
+        minecraftVersions.addAll(config.supportedMinecraftVersions)
+
+        from(curseforgeOptions)
+
+        val remapJarProvider = provider {
+            tasks.named<RemapJarTask>("remapJar")
+                .flatMap { it.asJar.archiveFile }
+        }.flatMap { it }
+
+        file.set(remapJarProvider)
+        displayName = "LAN Properties Fabric ${modVersion}+${formatSupportedVersions(config.supportedMinecraftVersions)}"
+
+        modLoaders.add("fabric")
+
+        requires("fabric-api")
+    }
+
     tasks.named<RemapJarTask>("remapJar") {
         dependsOn(tasks.named<ShadowJar>("shadowJar"))
         asJar {
@@ -369,6 +396,23 @@ fun Project.configureForgeModule(versionKey: String, config: VersionConfig) {
         minecraftVersions.addAll(config.supportedMinecraftVersions)
 
         from(modrinthOptions)
+
+        val remapJarProvider = provider {
+            tasks.named<RemapJarTask>("remapJar")
+                .flatMap { it.asJar.archiveFile }
+        }.flatMap { it }
+
+        file.set(remapJarProvider)
+        displayName = "LAN Properties Forge ${modVersion}+${formatSupportedVersions(config.supportedMinecraftVersions)}"
+
+        modLoaders.add("forge")
+    }
+
+    publishMods.curseforge("curseforge-forge-$versionKey") {
+        version = "${modVersion}+${formatSupportedVersions(config.supportedMinecraftVersions)}"
+        minecraftVersions.addAll(config.supportedMinecraftVersions)
+
+        from(curseforgeOptions)
 
         val remapJarProvider = provider {
             tasks.named<RemapJarTask>("remapJar")
@@ -460,6 +504,23 @@ fun Project.configureNeoForgeModule(versionKey: String, config: VersionConfig) {
         modLoaders.add("neoforge")
     }
 
+    publishMods.curseforge("curseforge-neoforge-$versionKey") {
+        version = "${modVersion}+${formatSupportedVersions(config.supportedMinecraftVersions)}"
+        minecraftVersions.addAll(config.supportedMinecraftVersions)
+
+        from(curseforgeOptions)
+
+        val remapJarProvider = provider {
+            tasks.named<RemapJarTask>("remapJar")
+                .flatMap { it.asJar.archiveFile }
+        }.flatMap { it }
+
+        file.set(remapJarProvider)
+        displayName = "LAN Properties NeoForge ${modVersion}+${formatSupportedVersions(config.supportedMinecraftVersions)}"
+
+        modLoaders.add("neoforge")
+    }
+
     tasks.named<RemapJarTask>("remapJar") {
         dependsOn(tasks.named<ShadowJar>("shadowJar"))
         asJar {
@@ -522,7 +583,26 @@ fun Project.configureQuiltModule(versionKey: String, config: VersionConfig) {
         }.flatMap { it }
 
         file.set(remapJarProvider)
-        displayName = "LAN Properties Forge ${modVersion}+${formatSupportedVersions(config.supportedMinecraftVersions)}"
+        displayName = "LAN Properties Quilt ${modVersion}+${formatSupportedVersions(config.supportedMinecraftVersions)}"
+
+        modLoaders.add("quilt")
+
+        requires("qsl")
+    }
+
+    publishMods.curseforge("curseforge-quilt-$versionKey") {
+        version = "${modVersion}+${formatSupportedVersions(config.supportedMinecraftVersions)}"
+        minecraftVersions.addAll(config.supportedMinecraftVersions)
+
+        from(curseforgeOptions)
+
+        val remapJarProvider = provider {
+            tasks.named<RemapJarTask>("remapJar")
+                .flatMap { it.asJar.archiveFile }
+        }.flatMap { it }
+
+        file.set(remapJarProvider)
+        displayName = "LAN Properties Quilt ${modVersion}+${formatSupportedVersions(config.supportedMinecraftVersions)}"
 
         modLoaders.add("quilt")
 
