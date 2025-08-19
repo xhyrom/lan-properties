@@ -1,5 +1,5 @@
 <h1 align="center">
-  <img src="../.github/legacy_fabric.png" alt="fabric thumbnail" width="300">
+  <img src="../.github/fabric.png" alt="fabric thumbnail" width="300">
 </h1>
 
 

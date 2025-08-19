@@ -147,7 +147,7 @@ fun Project.configureVersionSpecificModule() {
         inputs.property("minecraft_version", config.minecraftVersion)
         inputs.property("supported_versions", config.supportedVersions)
 
-        filesMatching(listOf("mcmod.info", "fabric.mod.json", "META-INF/mods.toml", "META-INF/neoforge.mods.toml", "${modId}.mixins.json")) {
+        filesMatching(listOf("pack.mcmeta", "mcmod.info", "fabric.mod.json", "META-INF/mods.toml", "META-INF/neoforge.mods.toml", "${modId}.mixins.json")) {
             expand(inputs.properties)
         }
     }
@@ -526,6 +526,7 @@ fun Project.configureShadowJar(shadowBundle: Configuration) {
         }
 
         relocate("org.tinylog", "dev.xhyrom.lanprops.shadow.tinylog")
+        relocate("com.google.gson", "dev.xhyrom.lanprops.shadow.gson")
 
         mergeServiceFiles()
     }
