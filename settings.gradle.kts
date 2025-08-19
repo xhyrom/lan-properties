@@ -33,10 +33,12 @@ sequenceOf(
 }
 
 
-val supportedVersions = listOf("v1_21_7")
+val supported = mapOf(
+    listOf("common", "fabric", "forge", "neoforge", "quilt") to "v1_21_7",
+)
 
-supportedVersions.forEach { version ->
-    sequenceOf("common", "fabric", "forge", "neoforge", "quilt", "ornithe").forEach { loader ->
+supported.forEach { (loaders, version) ->
+    loaders.forEach { loader ->
         include("$loader-$version")
         project(":$loader-$version").projectDir = file("$loader/$version")
     }

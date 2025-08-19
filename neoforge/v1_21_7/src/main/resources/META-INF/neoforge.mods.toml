@@ -15,7 +15,7 @@ config="${mod_id}.mixins.json"
 [[dependencies.${mod_id}]]
 modId="neoforge"
 type="required"
-versionRange="[21.8.32,)"
+versionRange="[21.1.200,)"
 ordering="NONE"
 side="BOTH"
 

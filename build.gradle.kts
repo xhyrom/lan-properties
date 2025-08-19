@@ -160,7 +160,7 @@ fun Project.configureVersionSpecificModule() {
         inputs.property("minecraft_version", config.minecraftVersion)
         inputs.property("supported_versions", formatSupportedVersions(config.supportedMinecraftVersions))
 
-        filesMatching(listOf("pack.mcmeta", "mcmod.info", "fabric.mod.json", "META-INF/mods.toml", "META-INF/neoforge.mods.toml", "${modId}.mixins.json")) {
+        filesMatching(listOf("pack.mcmeta", "mcmod.info", "fabric.mod.json", "quilt.mod.json", "META-INF/mods.toml", "META-INF/neoforge.mods.toml", "${modId}.mixins.json")) {
             expand(inputs.properties)
         }
     }
@@ -282,7 +282,7 @@ fun Project.configureFabricModule(versionKey: String, config: VersionConfig) {
         shadowBundle(project(":common-$versionKey"))
     }
 
-    publishMods.modrinth("modrinth-$versionKey") {
+    publishMods.modrinth("modrinth-fabric-$versionKey") {
         version = "${modVersion}+${formatSupportedVersions(config.supportedMinecraftVersions)}"
         minecraftVersions.addAll(config.supportedMinecraftVersions)
 
@@ -298,9 +298,7 @@ fun Project.configureFabricModule(versionKey: String, config: VersionConfig) {
 
         modLoaders.add("fabric")
 
-        requires {
-            slug = "fabric-api"
-        }
+        requires("fabric-api")
     }
 
     tasks.named<RemapJarTask>("remapJar") {
@@ -317,6 +315,7 @@ fun Project.configureFabricModule(versionKey: String, config: VersionConfig) {
 
     configureShadowJar(shadowBundle)
 }
+
 fun Project.configureForgeModule(versionKey: String, config: VersionConfig) {
     apply(plugin = "xyz.wagyourtail.unimined")
 
@@ -365,6 +364,23 @@ fun Project.configureForgeModule(versionKey: String, config: VersionConfig) {
         }
     }
 
+    publishMods.modrinth("modrinth-forge-$versionKey") {
+        version = "${modVersion}+${formatSupportedVersions(config.supportedMinecraftVersions)}"
+        minecraftVersions.addAll(config.supportedMinecraftVersions)
+
+        from(modrinthOptions)
+
+        val remapJarProvider = provider {
+            tasks.named<RemapJarTask>("remapJar")
+                .flatMap { it.asJar.archiveFile }
+        }.flatMap { it }
+
+        file.set(remapJarProvider)
+        displayName = "LAN Properties Forge ${modVersion}+${formatSupportedVersions(config.supportedMinecraftVersions)}"
+
+        modLoaders.add("forge")
+    }
+
     if (isLegacyVersion) {
         tasks.withType(Jar::class) {
             manifest.attributes.run {
@@ -390,6 +406,7 @@ fun Project.configureForgeModule(versionKey: String, config: VersionConfig) {
 
     configureShadowJar(shadowBundle)
 }
+
 fun Project.configureNeoForgeModule(versionKey: String, config: VersionConfig) {
     apply(plugin = "xyz.wagyourtail.unimined")
 
@@ -426,6 +443,23 @@ fun Project.configureNeoForgeModule(versionKey: String, config: VersionConfig) {
         shadowBundle(project(":common-$versionKey"))
     }
 
+    publishMods.modrinth("modrinth-neoforge-$versionKey") {
+        version = "${modVersion}+${formatSupportedVersions(config.supportedMinecraftVersions)}"
+        minecraftVersions.addAll(config.supportedMinecraftVersions)
+
+        from(modrinthOptions)
+
+        val remapJarProvider = provider {
+            tasks.named<RemapJarTask>("remapJar")
+                .flatMap { it.asJar.archiveFile }
+        }.flatMap { it }
+
+        file.set(remapJarProvider)
+        displayName = "LAN Properties NeoForge ${modVersion}+${formatSupportedVersions(config.supportedMinecraftVersions)}"
+
+        modLoaders.add("neoforge")
+    }
+
     tasks.named<RemapJarTask>("remapJar") {
         dependsOn(tasks.named<ShadowJar>("shadowJar"))
         asJar {
@@ -440,6 +474,7 @@ fun Project.configureNeoForgeModule(versionKey: String, config: VersionConfig) {
 
     configureShadowJar(shadowBundle)
 }
+
 fun Project.configureQuiltModule(versionKey: String, config: VersionConfig) {
     apply(plugin = "xyz.wagyourtail.unimined")
 
@@ -475,6 +510,25 @@ fun Project.configureQuiltModule(versionKey: String, config: VersionConfig) {
         shadowBundle(project(":common-$versionKey"))
     }
 
+    publishMods.modrinth("modrinth-quilt-$versionKey") {
+        version = "${modVersion}+${formatSupportedVersions(config.supportedMinecraftVersions)}"
+        minecraftVersions.addAll(config.supportedMinecraftVersions)
+
+        from(modrinthOptions)
+
+        val remapJarProvider = provider {
+            tasks.named<RemapJarTask>("remapJar")
+                .flatMap { it.asJar.archiveFile }
+        }.flatMap { it }
+
+        file.set(remapJarProvider)
+        displayName = "LAN Properties Forge ${modVersion}+${formatSupportedVersions(config.supportedMinecraftVersions)}"
+
+        modLoaders.add("quilt")
+
+        requires("qsl")
+    }
+
     tasks.named<RemapJarTask>("remapJar") {
         dependsOn(tasks.named<ShadowJar>("shadowJar"))
         asJar {
@@ -489,6 +543,7 @@ fun Project.configureQuiltModule(versionKey: String, config: VersionConfig) {
 
     configureShadowJar(shadowBundle)
 }
+
 fun Project.configureOrnitheModule(versionKey: String, config: VersionConfig) {
     apply(plugin = "xyz.wagyourtail.unimined")
 
@@ -522,6 +577,25 @@ fun Project.configureOrnitheModule(versionKey: String, config: VersionConfig) {
 
         implementation(project(":common-$versionKey"))
         shadowBundle(project(":common-$versionKey"))
+    }
+
+    publishMods.modrinth("modrinth-ornithe-$versionKey") {
+        version = "${modVersion}+${formatSupportedVersions(config.supportedMinecraftVersions)}"
+        minecraftVersions.addAll(config.supportedMinecraftVersions)
+
+        from(modrinthOptions)
+
+        val remapJarProvider = provider {
+            tasks.named<RemapJarTask>("remapJar")
+                .flatMap { it.asJar.archiveFile }
+        }.flatMap { it }
+
+        file.set(remapJarProvider)
+        displayName = "LAN Properties Ornithe ${modVersion}+${formatSupportedVersions(config.supportedMinecraftVersions)}"
+
+        modLoaders.add("ornithe")
+
+        requires("osl")
     }
 
     tasks.named<RemapJarTask>("remapJar") {
@@ -569,6 +643,7 @@ fun Project.configureShadowJar(shadowBundle: Configuration) {
 
         relocate("org.tinylog", "dev.xhyrom.lanprops.shadow.tinylog")
         relocate("com.google.gson", "dev.xhyrom.lanprops.shadow.gson")
+        relocate("com.google.errorprone", "dev.xhyrom.lanprops.shadow.errorprone")
 
         mergeServiceFiles()
     }
