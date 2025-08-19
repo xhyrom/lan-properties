@@ -16,13 +16,21 @@ val modDescription: String = property("mod_description") as String
 val modId: String = property("mod_id") as String
 val modVersion: String = property("mod_version") as String
 
+val modrinthToken = providers.gradleProperty("modrinth.token")
+    .orElse(providers.environmentVariable("MODRINTH_TOKEN"))
+
+val modrinthOptions = publishMods.modrinthOptions {
+    accessToken.set(modrinthToken)
+    projectId.set("deYSo63V")
+}
+
 version = modVersion
 group = "dev.xhyrom.lanprops"
 
 val versionConfigs = mapOf(
     "v1_21_7" to VersionConfig(
         minecraftVersion = "1.21.8",
-        supportedVersions = "1.21.7-1.21.8",
+        supportedMinecraftVersions = listOf("1.21.7", "1.21.8"),
         javaVersion = JavaVersion.VERSION_21,
         mappings = MappingsConfig(
             provider = "mojmap"
@@ -41,7 +49,7 @@ data class MappingsConfig(
 
 data class VersionConfig(
     val minecraftVersion: String,
-    val supportedVersions: String,
+    val supportedMinecraftVersions: List<String>,
     val javaVersion: JavaVersion,
     val mappings: MappingsConfig,
     val fabricLoaderVersion: String,
@@ -82,6 +90,11 @@ subprojects {
             configureVersionSpecificModule()
         }
     }
+}
+
+publishMods {
+    type = STABLE
+    changelog = getLatestChangelog()
 }
 
 fun Project.configureVersionSpecificModule() {
@@ -128,7 +141,7 @@ fun Project.configureVersionSpecificModule() {
     }
 
     base {
-        archivesName.set("${baseName}_${loader}-${modVersion}+${config.supportedVersions}")
+        archivesName.set("${baseName}_${loader}-${modVersion}+${formatSupportedVersions(config.supportedMinecraftVersions)}")
     }
 
     java {
@@ -145,7 +158,7 @@ fun Project.configureVersionSpecificModule() {
         inputs.property("mod_name", modName)
         inputs.property("mod_description", modDescription)
         inputs.property("minecraft_version", config.minecraftVersion)
-        inputs.property("supported_versions", config.supportedVersions)
+        inputs.property("supported_versions", formatSupportedVersions(config.supportedMinecraftVersions))
 
         filesMatching(listOf("pack.mcmeta", "mcmod.info", "fabric.mod.json", "META-INF/mods.toml", "META-INF/neoforge.mods.toml", "${modId}.mixins.json")) {
             expand(inputs.properties)
@@ -267,6 +280,27 @@ fun Project.configureFabricModule(versionKey: String, config: VersionConfig) {
 
         implementation(project(":common-$versionKey"))
         shadowBundle(project(":common-$versionKey"))
+    }
+
+    publishMods.modrinth("modrinth-$versionKey") {
+        version = "${modVersion}+${formatSupportedVersions(config.supportedMinecraftVersions)}"
+        minecraftVersions.addAll(config.supportedMinecraftVersions)
+
+        from(modrinthOptions)
+
+        val remapJarProvider = provider {
+            tasks.named<RemapJarTask>("remapJar")
+                .flatMap { it.asJar.archiveFile }
+        }.flatMap { it }
+
+        file.set(remapJarProvider)
+        displayName = "LAN Properties Fabric ${modVersion}+${formatSupportedVersions(config.supportedMinecraftVersions)}"
+
+        modLoaders.add("fabric")
+
+        requires {
+            slug = "fabric-api"
+        }
     }
 
     tasks.named<RemapJarTask>("remapJar") {
@@ -514,6 +548,14 @@ fun isLegacyVersion(version: String): Boolean {
     val minor = parts[1].toIntOrNull() ?: return false
 
     return major == 1 && minor <= 13
+}
+
+fun formatSupportedVersions(versions: List<String>): String {
+    if (versions.isEmpty()) return "none"
+
+    if (versions.size == 1) return versions.first()
+
+    return "${versions.first()}-${versions.last()}"
 }
 
 fun Project.configureShadowJar(shadowBundle: Configuration) {
