@@ -15,7 +15,7 @@ displayURL="https://modrinth.com/mod/lan-properties"
 [[dependencies.${mod_id}]]
 modId="minecraft"
 mandatory=true
-versionRange="[1.21.7,)"
+versionRange="[1.21.6,)"
 ordering="NONE"
 side="BOTH"
 

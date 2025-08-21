@@ -36,9 +36,9 @@ version = modVersion
 group = "dev.xhyrom.lanprops"
 
 val versionConfigs = mapOf(
-    "v1_21_7" to VersionConfig(
+    "v1_21_6" to VersionConfig(
         minecraftVersion = "1.21.8",
-        supportedMinecraftVersions = listOf("1.21.7", "1.21.8"),
+        supportedMinecraftVersions = listOf("1.21.6", "1.21.7", "1.21.8"),
         javaVersion = JavaVersion.VERSION_21,
         mappings = MappingsConfig(
             provider = "mojmap"

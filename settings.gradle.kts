@@ -34,7 +34,7 @@ sequenceOf(
 
 
 val supported = mapOf(
-    listOf("common", "fabric", "forge", "neoforge", "quilt") to "v1_21_7",
+    listOf("common", "fabric", "forge", "neoforge", "quilt") to "v1_21_6",
 )
 
 supported.forEach { (loaders, version) ->
