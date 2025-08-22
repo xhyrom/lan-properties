@@ -1,0 +1,36 @@
+{
+  "schema_version": 1,
+  "quilt_loader": {
+    "group": "dev.xhyrom.lanprops",
+    "id": "${mod_id}",
+    "version": "${mod_version}",
+    "metadata": {
+      "name": "${mod_name}",
+      "description": "${mod_description}",
+      "contributors": {
+        "xhyrom": "author"
+      },
+      "contact": {
+        "homepage": "https://modrinth.com/mod/lan-properties/",
+        "issues": "https://github.com/xhyrom/lan-properties/issues",
+        "sources": "https://github.com/xhyrom/lan-properties"
+      },
+      "icon": "assets/${mod_id}/icon.png"
+    },
+    "intermediate_mappings": "net.fabricmc:intermediary",
+    "entrypoints": {
+      "init": "dev.xhyrom.lanprops.LanPropertiesClientQuilt"
+    },
+    "depends": [
+      {
+        "id": "quilt_loader",
+        "versions": ">=0.19.1"
+      },
+      {
+        "id": "minecraft",
+        "versions": ">=1.20.3 <1.21"
+      }
+    ]
+  },
+  "mixin": "${mod_id}.mixins.json"
+}

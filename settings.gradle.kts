@@ -34,10 +34,12 @@ sequenceOf(
 
 
 val supported = mapOf(
-    listOf("common", "fabric", "forge", "neoforge", "quilt") to "v1_21_6",
+    "v1_21_6" to listOf("common", "fabric", "forge", "neoforge", "quilt"),
+    "v1_21" to listOf("common", "fabric", "forge", "neoforge", "quilt"),
+    "v1_20_3" to listOf("common", "fabric", "forge", "neoforge", "quilt"),
 )
 
-supported.forEach { (loaders, version) ->
+supported.forEach { (version, loaders) ->
     loaders.forEach { loader ->
         include("$loader-$version")
         project(":$loader-$version").projectDir = file("$loader/$version")

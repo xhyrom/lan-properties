@@ -47,6 +47,30 @@ val versionConfigs = mapOf(
         forgeVersion = "58.0.1",
         neoForgeVersion = "10",
         quiltVersion = "0.29.1"
+    ),
+    "v1_21" to VersionConfig(
+        minecraftVersion = "1.21.4",
+        supportedMinecraftVersions = listOf("1.21", "1.21.1", "1.21.2", "1.21.3", "1.21.4", "1.21.5"),
+        javaVersion = JavaVersion.VERSION_21,
+        mappings = MappingsConfig(
+            provider = "mojmap"
+        ),
+        fabricLoaderVersion = "0.16.14",
+        forgeVersion = "54.1.6",
+        neoForgeVersion = "151",
+        quiltVersion = "0.29.1"
+    ),
+    "v1_20_3" to VersionConfig(
+        minecraftVersion = "1.20.4",
+        supportedMinecraftVersions = listOf("1.20.3", "1.20.4", "1.20.5", "1.20.6"),
+        javaVersion = JavaVersion.VERSION_17,
+        mappings = MappingsConfig(
+            provider = "mojmap"
+        ),
+        fabricLoaderVersion = "0.16.14",
+        forgeVersion = "49.2.0",
+        neoForgeVersion = "250",
+        quiltVersion = "0.29.1"
     )
 )
 
